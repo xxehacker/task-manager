@@ -18,6 +18,6 @@ router.route("/update-profile").put(protected, updateUserProfile);
 
 router
   .route("/upload-image")
-  .post(protected, upload.single("profile"), uploadImage);
+  .post(upload.single("profile"), uploadImage);
 
 module.exports = router;
