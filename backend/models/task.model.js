@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const todoSchema = new mongoose.Schema({
-  todo: {
+  text: {
     type: String,
     required: true,
   },
@@ -31,8 +31,8 @@ const taskSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["Pending", "In-progress", "Completed"],
-      default: "Pending",
+      enum: ["pending", "in-progress", "completed"],
+      default: "pending",
     },
     assignedTo: [
       {
@@ -50,9 +50,11 @@ const taskSchema = new mongoose.Schema(
       },
     ],
     todoChecklist: [todoSchema],
-    prograss: {
+    progress: {
       type: Number,
       default: 0,
+      max: [10, "Progress cannot be more than 10"],
+      min: [0, "Progress cannot be negative"],
     },
   },
   {
