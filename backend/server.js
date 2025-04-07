@@ -33,9 +33,11 @@ app.use(cookieParser());
 
 // routes import
 const authRoutes = require("./routes/auth.routes");
+const userRoutes = require("./routes/user.routes");
 
 // routes
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/user", userRoutes);
 
 connectDB()
   .then(() => {
