@@ -212,15 +212,6 @@ const updateUserProfile = async (req, res) => {
 };
 
 const uploadImage = async (req, res) => {
-  // check if user is logged in
-  const user = await User.findById(req.user._id);
-
-  // check if user exists
-  if (!user) {
-    return res.status(401).json({
-      message: "Unauthorized access",
-    });
-  }
   const filename = req.file?.filename;
 
   if (!filename) {
