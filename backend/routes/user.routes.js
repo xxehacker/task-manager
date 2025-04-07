@@ -13,6 +13,6 @@ router.route("/:id").get(protected, getUserById);
 
 // admin
 router.route("/").get(protected, adminProtected, getAllUsers);
-router.route("/:id").delete(protected, adminProtected, deleteUserById);
+router.route("/:id").delete(protected,  adminProtected, deleteUserById);
 
 module.exports = router;
