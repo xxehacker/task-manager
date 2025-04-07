@@ -9,7 +9,6 @@ dotenv.config({
 });
 
 const app = express();
-
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -30,15 +29,13 @@ app.use(
   })
 );
 app.use(cookieParser());
+// app.use(express.static("uploads"));
 
 // routes import
 const authRoutes = require("./routes/auth.routes");
 
 // routes
 app.use("/api/v1/auth", authRoutes);
-// app.use("/api/v1/auth", authRoutes);
-// app.use("/api/v1/auth", authRoutes);
-// app.use("/api/v1/auth", authRoutes);
 
 connectDB()
   .then(() => {
