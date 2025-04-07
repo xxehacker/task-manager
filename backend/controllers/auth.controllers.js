@@ -174,9 +174,7 @@ const updateUserProfile = async (req, res) => {
     }
 
     // check if fields are different
-    if (
-      username === user.username
-    ) {
+    if (username === user.username) {
       return res.status(400).json({
         message: "Field should be different",
       });
@@ -187,7 +185,7 @@ const updateUserProfile = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       user._id,
       {
-        username: username
+        username: username,
       },
       { new: true }
     ).select("-password");
@@ -213,9 +211,38 @@ const updateUserProfile = async (req, res) => {
   }
 };
 
+const uploadImage = async (req, res) => {
+  // check if user is logged in
+  const user = await User.findById(req.user._id);
+
+  // check if user exists
+  if (!user) {
+    return res.status(401).json({
+      message: "Unauthorized access",
+    });
+  }
+  const filename = req.file?.filename;
+
+  if (!filename) {
+    return res.status(400).json({
+      message: "No file uploaded",
+    });
+  }
+
+  const fullImagePath = `${req.protocol}://${req.get(
+    "host"
+  )}/uploads/${filename}`;
+
+  return res.status(200).json({
+    message: "Image uploaded successfully",
+    profileImageURL: fullImagePath,
+  });
+};
+
 module.exports = {
   registerUser,
   loginUser,
   getUserProfile,
   updateUserProfile,
+  uploadImage,
 };
