@@ -164,10 +164,10 @@ const updateUserProfile = async (req, res) => {
         message: "Unauthorized access",
       });
     }
-    const { username, profileImageURL } = req.body;
+    const { username } = req.body;
 
     // check if all fields are provided
-    if (!username && !profileImageURL) {
+    if (!username) {
       return res.status(400).json({
         message: "At least one field is required",
       });
@@ -175,11 +175,10 @@ const updateUserProfile = async (req, res) => {
 
     // check if fields are different
     if (
-      username === user.username &&
-      profileImageURL === user.profileImageURL
+      username === user.username
     ) {
       return res.status(400).json({
-        message: "Fields should be different",
+        message: "Field should be different",
       });
     }
 
@@ -188,8 +187,7 @@ const updateUserProfile = async (req, res) => {
     const updatedUser = await User.findByIdAndUpdate(
       user._id,
       {
-        username: username,
-        profileImageURL: profileImageURL,
+        username: username
       },
       { new: true }
     ).select("-password");
