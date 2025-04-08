@@ -1,5 +1,4 @@
 const Task = require("../models/task.model");
-const User = require("../models/user.model");
 
 const getAllTasks = async (req, res) => {
   try {
@@ -89,6 +88,23 @@ const getAllTasks = async (req, res) => {
 
 const getTaskById = async (req, res) => {
   try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        message: "Task ID is required",
+      });
+    }
+
+    const task = await Task.findById(id).populate(
+      "assignedTo",
+      "username email profileImageURL"
+    );
+
+    return res.status(200).json({
+      message: "Task fetched successfully",
+      task,
+    });
   } catch (error) {
     console.log("error", error);
     res.status(500).json({
