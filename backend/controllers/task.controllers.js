@@ -115,6 +115,63 @@ const getTaskById = async (req, res) => {
 
 const updateTaskById = async (req, res) => {
   try {
+    const { id } = req.params;
+    const {
+      title,
+      description,
+      dueDate,
+      priority,
+      status,
+      todoChecklist,
+      attachments,
+      assignedTo,
+      progress,
+    } = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        message: "Task ID is required",
+      });
+    }
+
+    const task = await Task.findById(id);
+
+    if (!task) {
+      return res.status(404).json({
+        message: "Task not found",
+      });
+    }
+
+    if (assignedTo) {
+      if (!Array.isArray(assignedTo)) {
+        return res.status(400).json({
+          message: "assignedTo should be an array of user ids",
+        });
+      }
+    }
+
+    const updatedTask = await Task.findByIdAndUpdate(
+      id,
+      {
+        title: title || task.title,
+        description: description || task.description,
+        dueDate: dueDate || task.dueDate,
+        priority: priority || task.priority,
+        status: status || task.status,
+        todoChecklist: todoChecklist || task.todoChecklist,
+        attachments: attachments || task.attachments,
+        assignedTo: assignedTo || task.assignedTo,
+        progress: progress || task.progress,
+      },
+      {
+        new: true, // return the updated document
+      }
+    );
+
+    return res.status(200).json({
+      message: "Task updated successfully",
+      task: updatedTask,
+    });
   } catch (error) {
     console.log("error", error);
     res.status(500).json({

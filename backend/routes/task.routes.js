@@ -24,5 +24,5 @@ router.route("/delete/:id").delete(protected, adminProtected , deleteTaskById);
 router.route("/create").post(protected, adminProtected, createTask);
 router.route("/:id/status").put(protected, adminProtected, updateTaskStatus);
 router.route("/:id/todo").put(protected, adminProtected, updateTaskChecklist);
-
+ 
 module.exports = router;
