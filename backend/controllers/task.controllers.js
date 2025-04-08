@@ -182,6 +182,26 @@ const updateTaskById = async (req, res) => {
 
 const deleteTaskById = async (req, res) => {
   try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        message: "Task ID is required",
+      });
+    }
+
+    const task = await Task.findByIdAndDelete(id);
+
+    if (!task) {
+      return res.status(404).json({
+        message: "Task not found",
+      });
+    }
+
+    return res.status(200).json({
+      message: "Task deleted successfully",
+      task: task._id,
+    });
   } catch (error) {
     console.log("error", error);
     res.status(500).json({
