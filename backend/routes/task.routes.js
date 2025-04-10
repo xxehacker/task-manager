@@ -22,7 +22,7 @@ router.route("/get-task/:id").get(protected, getTaskById);
 router.route("/update/:id").put(protected, updateTaskById);
 router.route("/delete/:id").delete(protected, adminProtected , deleteTaskById);
 router.route("/create").post(protected, adminProtected, createTask);
-router.route("/:id/status").put(protected, adminProtected, updateTaskStatus);
-router.route("/:id/todo").put(protected, adminProtected, updateTaskChecklist);
+router.route("/update/:id/status").put(protected, adminProtected, updateTaskStatus);
+router.route("/update/:id/todo").put(protected, adminProtected, updateTaskChecklist);
  
 module.exports = router;
