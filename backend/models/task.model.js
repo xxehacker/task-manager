@@ -53,7 +53,7 @@ const taskSchema = new mongoose.Schema(
     progress: {
       type: Number,
       default: 0,
-      max: [10, "Progress cannot be more than 10"],
+      max: [100, "Progress cannot be more than 10"],
       min: [0, "Progress cannot be negative"],
     },
   },
