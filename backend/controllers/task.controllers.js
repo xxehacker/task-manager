@@ -280,12 +280,13 @@ const updateTaskStatus = async (req, res) => {
       });
     }
 
-    // Check if the user is assigned to the task
+    // Check if the user is assigned to the task : why this check ? because if the user is not assigned to the task then he can't update the status of the task
     const isAssigned = task.assignedTo.some(
       (userId) => userId.toString() === req.user._id.toString()
     );
-    Microsoft.QuickAction.Bluetooth;
+    console.log("isAssigned", isAssigned);
 
+    // Check if the user is admin : why this check ? because if the user is not admin then he can't update the status of the task
     if (!isAssigned && req.user.role !== "admin") {
       return res.status(403).json({
         message: "You are not assigned to this task",
@@ -315,6 +316,68 @@ const updateTaskStatus = async (req, res) => {
 
 const updateTaskChecklist = async (req, res) => {
   try {
+    const { id } = req.params;
+    const { todoChecklist } = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        message: "Task ID is required",
+      });
+    }
+
+    if (!todoChecklist) {
+      return res.status(400).json({
+        message: "todoChecklist is required",
+      });
+    }
+
+    const task = await Task.findById(id);
+
+    if (!task) {
+      return res.status(404).json({
+        message: "Task not found",
+      });
+    }
+
+    // Check if the user is assigned to the task and user is not admin then he can't update the status of the task
+    if (!task.assignedTo.includes(req.user._id) && req.user.role !== "admin") {
+      return res.status(403).json({
+        message: "You are not assigned to this task",
+      });
+    }
+
+    task.todoChecklist = todoChecklist;
+
+    // auto udpate progress based on checklist completion
+    const completedCount = task.todoChecklist.filter(
+      (item) => item.isCompleted
+    ).length;  // this is the number of items that are completed (basically the number of true values in the isCompleted array)
+    // console.log("completedCount", completedCount);
+    const totalItems = task.todoChecklist.length; // this is the total number of items in the isCompleted array
+    // console.log("totalItems", totalItems);
+
+    task.progress = totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
+
+    // auto update status based on progress
+    if (task.progress === 100) {
+      task.status = "completed";
+    } else if (task.progress > 0) {
+      task.status = "in-progress";
+    } else {
+      task.status = "pending";
+    }
+
+    await task.save();
+
+    const updatedTask = await Task.findById(id).populate(
+      "assignedTo",
+      "username email profileImageURL"
+    );
+
+    return res.status(200).json({
+      message: "Checklist updated successfully",
+      task: updatedTask,
+    });
   } catch (error) {
     console.log("error", error);
     res.status(500).json({
