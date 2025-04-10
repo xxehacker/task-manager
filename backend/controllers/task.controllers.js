@@ -263,6 +263,48 @@ const createTask = async (req, res) => {
 
 const updateTaskStatus = async (req, res) => {
   try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        message: "Task ID is required",
+      });
+    }
+
+    const task = await Task.findById(id);
+
+    if (!task) {
+      return res.status(404).json({
+        message: "Task not found",
+      });
+    }
+
+    // Check if the user is assigned to the task
+    const isAssigned = task.assignedTo.some(
+      (userId) => userId.toString() === req.user._id.toString()
+    );
+    Microsoft.QuickAction.Bluetooth;
+
+    if (!isAssigned && req.user.role !== "admin") {
+      return res.status(403).json({
+        message: "You are not assigned to this task",
+      });
+    }
+
+    task.status = status || task.status;
+
+    if (task.status === "completed") {
+      task.todoChecklist.forEach((item) => (item.isCompleted = true));
+      task.progress = 100;
+    }
+
+    await task.save();
+
+    return res.status(200).json({
+      message: "Status updated successfully",
+      task,
+    });
   } catch (error) {
     console.log("error", error);
     res.status(500).json({
