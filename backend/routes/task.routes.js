@@ -15,8 +15,8 @@ const {
 
 const router = express.Router();
 
-router.route("/dashboard-data").get(protected, getDashboardData);
-router.route("/user-dashboard-data").post(protected, getUserDashboardData);
+router.route("/dashboard-data").get(protected,  getDashboardData);
+router.route("/user-dashboard-data").get(protected, getUserDashboardData);
 router.route("/").get(protected, getAllTasks);
 router.route("/get-task/:id").get(protected, getTaskById);
 router.route("/update/:id").put(protected, updateTaskById);
