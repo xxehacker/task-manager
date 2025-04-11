@@ -480,6 +480,98 @@ const getDashboardData = async (req, res) => {
 
 const getUserDashboardData = async (req, res) => {
   try {
+    const userId = req.user._id;
+    const totalTasks = await Task.countDocuments({ assignedTo: userId });
+    const completedTasks = await Task.countDocuments({
+      assignedTo: userId,
+      status: "completed",
+    });
+    const pendingTasks = await Task.countDocuments({
+      assignedTo: userId,
+      status: "pending",
+    });
+    const inProgressTasks = await Task.countDocuments({
+      assignedTo: userId,
+      status: "in-progress",
+    });
+    const overdueTasks = await Task.countDocuments({
+      assignedTo: userId,
+      status: { $ne: "completed" }, // ne: not equal
+      dueDate: { $lt: new Date() }, // lt: less than
+    }); // note: overdue tasks are tasks that are not completed and their due date is less than the current date
+
+    //* task distribution by status
+    const taskStatuses = ["pending", "in-progress", "completed"];
+
+    // note: taskDistributionRaw is an array of objects that contains the distribution of tasks by status . We use aggregate method to match the tasks that are assigned to the user and group them by status
+    const taskDistributionRaw = await Task.aggregate([
+      {
+        $match: {
+          assignedTo: userId,
+        },
+      },
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const taskDistribution = taskStatuses.reduce((acc, status) => {
+      // note: replace spaces with empty string
+      const formatedKey = status.replace(/\s+/g, "");
+      acc[formatedKey] =
+        taskDistributionRaw.find((item) => item._id === status)?.count || 0; //* find the item in the array that has the same _id as the status
+      return acc;
+    }, {});
+
+    taskDistribution["All"] = totalTasks;
+
+    // note: priorityDistributionRaw is an array of objects that contains the distribution of tasks by priority (low, medium, high)
+    const taskPriorities = ["low", "medium", "high"];
+    const priorityDistributionRaw = await Task.aggregate([
+      {
+        $match: {
+          assignedTo: userId,
+        },
+      },
+      {
+        $group: {
+          _id: "$priority",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const taskPriorityLevel = taskPriorities.reduce((acc, priority) => {
+      acc[priority] =
+        priorityDistributionRaw.find((item) => item._id === priority)?.count ||
+        0;
+      return acc;
+    }, {});
+
+    //* fetch recent 10 tasks
+    const recentTasks = await Task.find({ assignedTo: userId })
+      .sort({ createdAt: -1 })
+      .limit(10)
+      .select("title status priority dueDate createdAt");
+
+    return res.status(200).json({
+      message: "User dashboard data fetched successfully",
+      statistics: {
+        totalTasks,
+        completedTasks,
+        pendingTasks,
+        inProgressTasks,
+        overdueTasks,
+      },
+      charts: {
+        taskDistribution,
+        taskPriorityLevel,
+      },
+      recentTasks,
+    });
   } catch (error) {
     console.log("error", error);
     res.status(500).json({
