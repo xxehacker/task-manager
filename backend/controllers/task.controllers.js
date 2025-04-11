@@ -351,12 +351,13 @@ const updateTaskChecklist = async (req, res) => {
     // auto udpate progress based on checklist completion
     const completedCount = task.todoChecklist.filter(
       (item) => item.isCompleted
-    ).length;  // this is the number of items that are completed (basically the number of true values in the isCompleted array)
+    ).length; // this is the number of items that are completed (basically the number of true values in the isCompleted array)
     // console.log("completedCount", completedCount);
     const totalItems = task.todoChecklist.length; // this is the total number of items in the isCompleted array
     // console.log("totalItems", totalItems);
 
-    task.progress = totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
+    task.progress =
+      totalItems > 0 ? Math.round((completedCount / totalItems) * 100) : 0;
 
     // auto update status based on progress
     if (task.progress === 100) {
@@ -388,6 +389,86 @@ const updateTaskChecklist = async (req, res) => {
 
 const getDashboardData = async (req, res) => {
   try {
+    const totalTasks = await Task.countDocuments();
+    const completedTasks = await Task.countDocuments({ status: "completed" });
+    const pendingTasks = await Task.countDocuments({ status: "pending" });
+    const inProgressTasks = await Task.countDocuments({
+      status: "in-progress",
+    });
+    const overdueTasks = await Task.countDocuments({
+      status: { $ne: "completed" }, // ne: not equal
+      dueDate: { $lt: new Date() }, // lt: less than
+    }); // note: overdue tasks are tasks that are not completed and their due date is less than the current date
+
+    //* Ensure all possible statuses are included
+    const taskStatuses = ["pending", "in-progress", "completed"];
+    // note:  aggregate: this is a mongoDB method that allows you to perform complex queries on your database without having to write a separate query for each operation. In this case, we are using it to get the distribution of tasks by status (pending, in-progress, completed)
+    const taskDistributionRaw = await Task.aggregate([
+      {
+        $group: {
+          _id: "$status",
+          count: { $sum: 1 },
+        },
+      },
+    ]); // note: this is an array of objects that contains the distribution of tasks by status
+    console.log("taskDistributionRaw", taskDistributionRaw);
+
+    // note: taskDistribution is an object that contains the distribution of tasks by status
+    const taskDistribution = taskStatuses.reduce((acc, status) => {
+      const formatedKey = status.replace(/\s+/g, ""); // remove spaces
+      acc[formatedKey] =
+        taskDistributionRaw.find((item) => item._id === status)?.count || 0; // find the item in the array that has the same _id as the status
+      return acc;
+    }, {});
+    console.log("taskDistribution", taskDistribution);
+
+    taskDistribution["All"] = totalTasks;
+
+    //* Ensure all priorities are included
+    // note: priorityDistributionRaw is an array of objects that contains the distribution of tasks by priority (low, medium, high)
+    const priorityDistributionRaw = await Task.aggregate([
+      {
+        $group: {
+          _id: "$priority",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+    console.log("priorityDistributionRaw", priorityDistributionRaw);
+
+    // note: taskPriorityLevel is an object that contains the distribution of tasks by priority
+    const taskPriorityLevel = ["low", "medium", "high"].reduce(
+      (acc, priority) => {
+        acc[priority] =
+          priorityDistributionRaw.find((item) => item._id === priority)
+            ?.count || 0;
+        return acc;
+      },
+      {}
+    );
+    console.log("taskPriority", taskPriorityLevel);
+
+    //* Fetch recent 10 tasks
+    const recentTasks = await Task.find()
+      .sort({ createdAt: -1 }) //* sort by createdAt field in descending order
+      .limit(10) ///* limit to 10 tasks
+      .select("title sstatus priority dueDate createdAt"); //* select only the fields we need
+
+    return res.status(200).json({
+      message: "Dashboard data fetched successfully",
+      statistics: {
+        totalTasks,
+        completedTasks,
+        pendingTasks,
+        inProgressTasks,
+        overdueTasks,
+      },
+      charts: {
+        taskDistribution,
+        taskPriorityLevel,
+      },
+      recentTasks,
+    });
   } catch (error) {
     console.log("error", error);
     res.status(500).json({
