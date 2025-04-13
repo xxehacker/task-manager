@@ -16,7 +16,7 @@ const protected = async (req, res, next) => {
     }
     // console.log("decoded", decoded);
 
-    // in this step i getting a error while finding the user in the database i dont get the user because in the time of jwt sign i put userId but now i used decoded._id to find the user. so i have to change the code in this step like this decoded.userId
+    //note: in this step i getting a error while finding the user in the database i dont get the user because in the time of jwt sign i put userId but now i used decoded._id to find the user. so i have to change the code in this step like this decoded.userId
 
     const user = await User.findById(decoded.userId).select("-password");
   
