@@ -88,7 +88,7 @@ const registerUser = async (req, res) => {
 const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
-    // console.log(req.body);
+    console.log(req.body);
 
     // check if all fields are provided
     if (!email || !password) {
@@ -133,10 +133,10 @@ const loginUser = async (req, res) => {
 
 const getUserProfile = async (req, res) => {
   try {
-    const user = req.user;
+    const user = await User.findById(req?.user?._id).select("-password");
     if (!user) {
-      return res.status(401).json({
-        message: "Unauthorized access",
+      return res.status(404).json({
+        message: "User not found",
       });
     }
 
@@ -160,8 +160,8 @@ const updateUserProfile = async (req, res) => {
 
     // check if user exists
     if (!user) {
-      return res.status(401).json({
-        message: "Unauthorized access",
+      return res.status(404).json({
+        message: "User not found",
       });
     }
     const { username } = req.body;
