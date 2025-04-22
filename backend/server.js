@@ -11,20 +11,20 @@ dotenv.config({
 const app = express();
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
   })
 );
 app.use(
   express.json({
-    limit: "50mb",
+    limit: "50kb",
   })
 );
 
 app.use(
   express.urlencoded({
-    limit: "50mb",
+    limit: "50kb",
     extended: true,
   })
 );
