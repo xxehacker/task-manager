@@ -16,7 +16,7 @@ const UserContextProvider = ({ children }) => {
         const response = await AXIOS_INSTANCE.get(
           API_ENDPOINTS.AUTH.GET_PROFILE
         );
-        setUser(response.data);
+        setUser(response.data.user);
       } catch (error) {
         console.log("User not found");
       } finally {
