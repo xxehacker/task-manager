@@ -3,14 +3,20 @@ import AuthLayout from "../../components/layouts/AuthLayout";
 import { Link, useNavigate } from "react-router-dom";
 import Input from "../../components/inputs/Input";
 import { validateEmail } from "../../utils/helper";
+import AXIOS_INSTANCE from "../../utils/axiosInstance";
+import { API_ENDPOINTS } from "../../utils/apiPath";
+import { UserContext } from "../../context/userContext";
+import { useContext } from "react";
 
 function Login() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [error, setError] = React.useState(null);
-  const [loading, setLoading] = React.useState(false);
+  // const [loading, setLoading] = React.useState(false);
 
   const navigate = useNavigate();
+
+  const { setUser } = useContext(UserContext);
 
   // handle login form submit
   const handleLoginSubmit = async (e) => {
@@ -34,7 +40,30 @@ function Login() {
 
     setError(null);
 
-    setLoading(true);
+    // login api call
+    try {
+      const response = await AXIOS_INSTANCE.post(API_ENDPOINTS.AUTH.LOGIN, {
+        email,
+        password,
+      });
+
+      if (!response.data?.user) {
+        console.log("Login failed");
+      }
+      // global state - userContext
+      setUser(response.data?.user);
+
+      alert(response.data?.message); // toast mesage
+      if (response.data?.user?.role || response.data?.user?.role === "admin") {
+        navigate("/admin/dashboard");
+      }
+
+      if (response.data?.user?.role || response.data?.user?.role === "member") {
+        navigate("/user/dashboard");
+      }
+    } catch (error) {
+      console.log("Login error: ", error?.message);
+    }
   };
 
   return (
@@ -68,10 +97,10 @@ function Login() {
 
           <p className="text-[13px] text-slate-800 mt-3">
             Don't have an account ?{" "}
+            <Link className="font-medium text-primary underline" to="/signup">
+              SignUp
+            </Link>
           </p>
-          <Link className="font-medium text-primary underline" to="/signup">
-            Signup
-          </Link>
         </form>
       </div>
     </AuthLayout>
