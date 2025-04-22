@@ -54,12 +54,17 @@ function Login() {
       setUser(response.data?.user);
 
       alert(response.data?.message); // toast mesage
-      if (response.data?.user?.role || response.data?.user?.role === "admin") {
-        navigate("/admin/dashboard");
-      }
 
-      if (response.data?.user?.role || response.data?.user?.role === "member") {
-        navigate("/user/dashboard");
+      const role = response.data?.user?.role;
+      switch (role) {
+        case "admin":
+          navigate("/admin/dashboard");
+          break;
+        case "member":
+          navigate("/user/dashboard");
+          break;
+        default:
+          navigate("/login"); // or a 404/unauthorized page
       }
     } catch (error) {
       console.log("Login error: ", error?.message);
