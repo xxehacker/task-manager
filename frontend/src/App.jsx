@@ -10,8 +10,12 @@ import UserDashboard from "./pages/user/UserDashboard";
 import MyTasks from "./pages/user/MyTasks";
 import ViewTaskDetails from "./pages/user/ViewTaskDetails";
 import PrivateRoute from "./routes/PrivateRoute";
+import Auth from "./components/Auth";
+import useUserAuth from "./hooks/useUserAuth";
 
 function App() {
+  useUserAuth();
+
   return (
     <>
       <div>
@@ -19,7 +23,7 @@ function App() {
           <Routes>
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
-            {/*admin routes  */}W
+            {/*admin routes  */}
             <Route element={<PrivateRoute allowedRoles={["admin"]} />}>
               <Route path="/admin/dashboard" element={<Dashboard />} />
               <Route path="/admin/create-task" element={<CreateTask />} />
@@ -35,6 +39,8 @@ function App() {
                 element={<ViewTaskDetails />}
               />
             </Route>
+            {/* Default route */}
+            <Route path="/" element={<Auth />} />
           </Routes>
         </Router>
       </div>
