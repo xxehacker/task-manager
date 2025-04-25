@@ -56,7 +56,7 @@ const getAllTasks = async (req, res) => {
     // console.log("pending tasks", pendingTasks);
 
     const inProgressTasks = await Task.countDocuments({
-      status: "in-progress",
+      status: "inProgress",
       ...(req.user.role !== "admin" && { assignedTo: req.user._id }),
     });
     // console.log("in progress tasks", inProgressTasks);
@@ -363,7 +363,7 @@ const updateTaskChecklist = async (req, res) => {
     if (task.progress === 100) {
       task.status = "completed";
     } else if (task.progress > 0) {
-      task.status = "in-progress";
+      task.status = "inProgress";
     } else {
       task.status = "pending";
     }
@@ -393,7 +393,7 @@ const getDashboardData = async (req, res) => {
     const completedTasks = await Task.countDocuments({ status: "completed" });
     const pendingTasks = await Task.countDocuments({ status: "pending" });
     const inProgressTasks = await Task.countDocuments({
-      status: "in-progress",
+      status: "inProgress",
     });
     const overdueTasks = await Task.countDocuments({
       status: { $ne: "completed" }, // ne: not equal
@@ -401,7 +401,7 @@ const getDashboardData = async (req, res) => {
     }); // note: overdue tasks are tasks that are not completed and their due date is less than the current date
 
     //* Ensure all possible statuses are included
-    const taskStatuses = ["pending", "in-progress", "completed"];
+    const taskStatuses = ["pending", "inProgress", "completed"];
     // note:  aggregate: this is a mongoDB method that allows you to perform complex queries on your database without having to write a separate query for each operation. In this case, we are using it to get the distribution of tasks by status (pending, in-progress, completed)
     const taskDistributionRaw = await Task.aggregate([
       {
@@ -492,7 +492,7 @@ const getUserDashboardData = async (req, res) => {
     });
     const inProgressTasks = await Task.countDocuments({
       assignedTo: userId,
-      status: "in-progress",
+      status: "inProgress",
     });
     const overdueTasks = await Task.countDocuments({
       assignedTo: userId,
@@ -501,7 +501,7 @@ const getUserDashboardData = async (req, res) => {
     }); // note: overdue tasks are tasks that are not completed and their due date is less than the current date
 
     //* task distribution by status
-    const taskStatuses = ["pending", "in-progress", "completed"];
+    const taskStatuses = ["pending", "inProgress", "completed"];
 
     // note: taskDistributionRaw is an array of objects that contains the distribution of tasks by status . We use aggregate method to match the tasks that are assigned to the user and group them by status
     const taskDistributionRaw = await Task.aggregate([

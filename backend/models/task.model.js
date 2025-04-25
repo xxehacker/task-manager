@@ -31,7 +31,7 @@ const taskSchema = new mongoose.Schema(
     },
     status: {
       type: String,
-      enum: ["pending", "in-progress", "completed"],
+      enum: ["pending", "inProgress", "completed"],
       default: "pending",
     },
     assignedTo: [
@@ -53,7 +53,7 @@ const taskSchema = new mongoose.Schema(
     progress: {
       type: Number,
       default: 0,
-      max: [100, "Progress cannot be more than 10"],
+      max: [100, "Progress cannot be more than 100"],
       min: [0, "Progress cannot be negative"],
     },
   },
