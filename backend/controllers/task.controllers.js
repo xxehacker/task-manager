@@ -452,7 +452,7 @@ const getDashboardData = async (req, res) => {
     const recentTasks = await Task.find()
       .sort({ createdAt: -1 }) //* sort by createdAt field in descending order
       .limit(10) ///* limit to 10 tasks
-      .select("title sstatus priority dueDate createdAt"); //* select only the fields we need
+      .select("title status priority createdAt"); //* select only the fields we need
 
     return res.status(200).json({
       message: "Dashboard data fetched successfully",
@@ -555,7 +555,7 @@ const getUserDashboardData = async (req, res) => {
     const recentTasks = await Task.find({ assignedTo: userId })
       .sort({ createdAt: -1 })
       .limit(10)
-      .select("title status priority dueDate createdAt");
+      .select("title status priority createdAt");
 
     return res.status(200).json({
       message: "User dashboard data fetched successfully",
