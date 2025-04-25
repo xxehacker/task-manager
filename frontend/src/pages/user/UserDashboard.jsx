@@ -1,9 +1,10 @@
-import React from 'react'
+import React from "react";
+import useUserAuth from "../../hooks/useUserAuth";
 
-function Dashboard() {
-  return (
-    <div>Dashboard</div>
-  )
+function UserDashboard() {
+  useUserAuth();
+
+  return <div>Dashboard</div>;
 }
 
-export default Dashboard
+export default UserDashboard;
